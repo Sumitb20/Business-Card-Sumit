@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sumit Bhoyar | Build Tek Events</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -12,8 +12,12 @@
 :root{
   --gold:#C8A96A;
   --gold-hi:#F0D485;
+  --gold-deep:#A07840;
   --cyan:#00E8D9;
-  --bg:#05050E;
+  --cyan-dim:rgba(0,232,217,.15);
+  --bg:#04040D;
+  --glass:rgba(8,10,22,.72);
+  --glass-border:rgba(255,255,255,.09);
 }
 
 body{
@@ -27,166 +31,255 @@ body{
   align-items:center;
   justify-content:center;
   gap:28px;
+  position:relative;
+}
+
+/* ─── BACKGROUND IMAGE LAYER ─── */
+.bg-image{
+  position:fixed;inset:0;z-index:0;
+  background-image:url('https://images.unsplash.com/photo-1486325212027-8081e485255e?w=1800&q=80');
+  background-size:cover;
+  background-position:center;
+  filter:saturate(0.6) brightness(0.38);
+  transform:scale(1.04);
+  animation:bgDrift 30s ease-in-out infinite alternate;
+}
+@keyframes bgDrift{from{transform:scale(1.04) translate(0,0)}to{transform:scale(1.08) translate(-8px,5px)}}
+
+/* ─── CINEMATIC OVERLAYS ─── */
+/* Deep vignette */
+.vignette{
+  position:fixed;inset:0;z-index:1;
+  background:
+    radial-gradient(ellipse 70% 70% at 50% 50%, transparent 30%, rgba(4,4,13,.7) 100%),
+    linear-gradient(180deg, rgba(4,4,13,.55) 0%, transparent 35%, transparent 65%, rgba(4,4,13,.65) 100%);
+  pointer-events:none;
+}
+
+/* Colour grade tint */
+.grade{
+  position:fixed;inset:0;z-index:2;
+  background:
+    radial-gradient(ellipse 900px 700px at 15% 20%, rgba(42,20,86,.52) 0%, transparent 65%),
+    radial-gradient(ellipse 700px 600px at 88% 85%, rgba(0,55,46,.5) 0%, transparent 65%);
+  pointer-events:none;
 }
 
 /* Particle canvas */
-#canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+#canvas{position:fixed;inset:0;z-index:3;pointer-events:none}
 
-/* Ambient blobs */
-.blob{position:fixed;border-radius:50%;filter:blur(90px);pointer-events:none}
-.blob-a{width:500px;height:500px;background:radial-gradient(circle,#2A1456 0%,transparent 70%);top:-150px;left:-120px;opacity:.7;animation:driftA 18s ease-in-out infinite}
-.blob-b{width:380px;height:380px;background:radial-gradient(circle,#00372E 0%,transparent 70%);bottom:-80px;right:-80px;opacity:.6;animation:driftB 22s ease-in-out infinite}
-@keyframes driftA{0%,100%{transform:translate(0,0)}50%{transform:translate(40px,30px)}}
-@keyframes driftB{0%,100%{transform:translate(0,0)}50%{transform:translate(-30px,-20px)}}
+/* Noise texture */
+.noise{
+  position:fixed;inset:0;z-index:4;pointer-events:none;
+  opacity:.028;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:256px;
+}
 
-/* Scene + card */
+/* ─── SCENE + CARD ─── */
 .scene{perspective:1400px;position:relative;z-index:10;animation:rise .9s cubic-bezier(.16,1,.3,1) both}
 .card{
-  width:390px;height:235px;
+  width:410px;height:250px;
   position:relative;transform-style:preserve-3d;
   cursor:pointer;will-change:transform;
   transition:transform .1s linear;
+  filter:drop-shadow(0 35px 60px rgba(0,0,0,.75));
 }
 .card.flipping{transition:transform .75s cubic-bezier(.16,1,.3,1)!important}
 
 .face{
-  position:absolute;inset:0;border-radius:22px;
+  position:absolute;inset:0;border-radius:24px;
   backface-visibility:hidden;-webkit-backface-visibility:hidden;
   overflow:hidden;
 }
 
 /* ===== FRONT ===== */
 .front{
-  padding:28px 30px;
-  background:linear-gradient(140deg,rgba(22,18,45,.95) 0%,rgba(10,10,26,.97) 60%,rgba(14,22,38,.97) 100%);
-  border:1px solid rgba(255,255,255,.1);
+  padding:30px 32px;
+  background:
+    linear-gradient(135deg,rgba(22,18,45,.88) 0%,rgba(8,10,22,.92) 55%,rgba(12,20,35,.92) 100%);
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border:1px solid rgba(255,255,255,.11);
   box-shadow:
-    0 0 0 .5px rgba(200,169,106,.2),
-    0 30px 70px rgba(0,0,0,.7),
-    inset 0 1px 0 rgba(255,255,255,.08),
-    inset 0 -1px 0 rgba(0,0,0,.3);
+    0 0 0 .5px rgba(200,169,106,.22),
+    inset 0 1px 0 rgba(255,255,255,.1),
+    inset 0 -1px 0 rgba(0,0,0,.25);
   display:flex;flex-direction:column;justify-content:space-between;
+}
+
+/* Photo circle */
+.photo-ring{
+  position:absolute;top:24px;right:26px;
+  width:62px;height:62px;border-radius:50%;
+  padding:2.5px;
+  background:conic-gradient(var(--gold),var(--gold-hi),var(--cyan),var(--gold),var(--gold));
+  animation:spinRing 8s linear infinite;
+  box-shadow:0 0 24px rgba(200,169,106,.35),0 0 48px rgba(0,232,217,.12);
+}
+@keyframes spinRing{to{filter:hue-rotate(30deg)}}
+.photo-inner{
+  width:100%;height:100%;border-radius:50%;
+  background:linear-gradient(135deg,#1a1235,#0a1525);
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+  border:2px solid rgba(255,255,255,.06);
+}
+.photo-inner img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.photo-initials{
+  font-family:'Syne',sans-serif;font-size:20px;font-weight:900;
+  background:linear-gradient(135deg,var(--gold),var(--gold-hi));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
 }
 
 /* Holographic foil */
 .holo{
-  position:absolute;inset:0;border-radius:22px;pointer-events:none;
+  position:absolute;inset:0;border-radius:24px;pointer-events:none;
   background:conic-gradient(
     from calc(var(--angle,0)*1deg) at calc(var(--mx,50)*1%) calc(var(--my,50)*1%),
-    hsl(0,100%,70%),hsl(60,100%,70%),hsl(120,100%,70%),
-    hsl(180,100%,70%),hsl(240,100%,70%),hsl(300,100%,70%),hsl(360,100%,70%)
+    hsl(0,100%,68%),hsl(60,100%,68%),hsl(120,100%,68%),
+    hsl(180,100%,68%),hsl(240,100%,68%),hsl(300,100%,68%),hsl(360,100%,68%)
   );
   mix-blend-mode:screen;
   opacity:0;transition:opacity .4s ease;
 }
-.front:hover .holo{opacity:.07}
+.front:hover .holo{opacity:.09}
 
-/* Top shimmer line */
+/* Top shimmer */
 .front::after{
-  content:'';position:absolute;top:0;left:48px;right:48px;height:1.5px;
+  content:'';position:absolute;top:0;left:40px;right:40px;height:1.5px;
   background:linear-gradient(90deg,transparent,var(--gold),var(--cyan),var(--gold-hi),var(--gold),transparent);
-  opacity:.7;
+  opacity:.8;
 }
 
 /* Corner etch marks */
-.etch{position:absolute;width:14px;height:14px;border-color:rgba(200,169,106,.45);border-style:solid}
-.etch.tl{top:13px;left:13px;border-width:1.5px 0 0 1.5px}
-.etch.tr{top:13px;right:13px;border-width:1.5px 1.5px 0 0}
-.etch.bl{bottom:13px;left:13px;border-width:0 0 1.5px 1.5px}
-.etch.br{bottom:13px;right:13px;border-width:0 1.5px 1.5px 0}
-
-/* Chip decor */
-.chip{
-  position:absolute;top:26px;right:28px;width:38px;height:28px;
-  border:1px solid rgba(200,169,106,.3);border-radius:5px;
-  display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;gap:3px;padding:5px;
-}
-.chip-cell{background:rgba(200,169,106,.2);border-radius:1px}
+.etch{position:absolute;width:16px;height:16px;border-color:rgba(200,169,106,.5);border-style:solid}
+.etch.tl{top:14px;left:14px;border-width:1.5px 0 0 1.5px}
+.etch.tr{top:14px;right:14px;border-width:1.5px 1.5px 0 0}
+.etch.bl{bottom:14px;left:14px;border-width:0 0 1.5px 1.5px}
+.etch.br{bottom:14px;right:14px;border-width:0 1.5px 1.5px 0}
 
 .name{
   font-family:'Syne',sans-serif;
-  font-size:28px;font-weight:800;letter-spacing:-.5px;
-  background:linear-gradient(135deg,#fff 40%,rgba(255,255,255,.7));
+  font-size:30px;font-weight:900;letter-spacing:-.6px;
+  background:linear-gradient(135deg,#fff 30%,rgba(255,255,255,.75));
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
   line-height:1;
 }
 
 .role{
-  margin-top:7px;font-size:10.5px;font-weight:600;
-  letter-spacing:2.5px;text-transform:uppercase;
-  color:var(--gold);display:flex;align-items:center;gap:8px;
+  margin-top:6px;font-size:10px;font-weight:600;
+  letter-spacing:2.8px;text-transform:uppercase;
+  color:var(--gold);display:flex;align-items:center;gap:9px;
 }
-.role::before{content:'';width:22px;height:1px;background:var(--gold);opacity:.6}
+.role::before{content:'';width:20px;height:1px;background:linear-gradient(90deg,var(--gold),var(--gold-hi));opacity:.7}
 
-.contacts{display:flex;flex-direction:column;gap:9px}
+.contacts{display:flex;flex-direction:column;gap:10px}
 .c-item{
-  display:flex;align-items:center;gap:11px;
-  font-size:13px;color:rgba(255,255,255,.65);font-weight:400;
+  display:flex;align-items:center;gap:12px;
+  font-size:12.5px;color:rgba(255,255,255,.68);font-weight:400;
+  transition:color .2s;
 }
-.c-item i{font-size:11px;color:var(--cyan);width:14px;text-align:center;flex-shrink:0}
+.c-item:hover{color:rgba(255,255,255,.95)}
+.c-icon{
+  width:26px;height:26px;border-radius:7px;
+  background:rgba(0,232,217,.1);
+  border:1px solid rgba(0,232,217,.18);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  transition:all .2s;
+}
+.c-item:hover .c-icon{background:rgba(0,232,217,.2);box-shadow:0 0 12px rgba(0,232,217,.25)}
+.c-icon i{font-size:10.5px;color:var(--cyan)}
 
 .brand{
-  position:absolute;bottom:26px;right:30px;
-  font-family:'Syne',sans-serif;font-size:9.5px;font-weight:700;
-  letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.2);
+  position:absolute;bottom:28px;right:32px;
+  font-family:'Syne',sans-serif;font-size:9px;font-weight:700;
+  letter-spacing:3px;text-transform:uppercase;
+  color:rgba(255,255,255,.18);
 }
 
 /* ===== BACK ===== */
 .back{
-  padding:28px 30px;
+  padding:28px 32px;
   transform:rotateY(180deg);
-  background:linear-gradient(140deg,rgba(6,16,28,.97) 0%,rgba(4,10,18,.98) 100%);
-  border:1px solid rgba(0,232,217,.12);
+  background:
+    linear-gradient(140deg,rgba(6,14,26,.93) 0%,rgba(3,8,16,.96) 100%);
+  backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);
+  border:1px solid rgba(0,232,217,.15);
   box-shadow:
     0 0 0 .5px rgba(0,232,217,.1),
-    0 30px 70px rgba(0,0,0,.7),
-    inset 0 1px 0 rgba(0,232,217,.08);
-  display:flex;flex-direction:column;justify-content:center;gap:15px;
+    inset 0 1px 0 rgba(0,232,217,.1);
+  display:flex;flex-direction:column;justify-content:center;gap:14px;
 }
 
 /* Blueprint grid */
 .back::before{
-  content:'';position:absolute;inset:0;
+  content:'';position:absolute;inset:0;border-radius:24px;
   background-image:
     linear-gradient(rgba(0,232,217,.04) 1px,transparent 1px),
     linear-gradient(90deg,rgba(0,232,217,.04) 1px,transparent 1px);
-  background-size:28px 28px;pointer-events:none;
+  background-size:26px 26px;pointer-events:none;
+}
+
+/* Glow orb behind back */
+.back::after{
+  content:'';position:absolute;top:-80px;right:-60px;
+  width:280px;height:280px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,232,217,.07) 0%,transparent 70%);
+  pointer-events:none;
 }
 
 .summit-eyebrow{
-  font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;
-  color:var(--cyan);opacity:.8;
+  font-size:9.5px;font-weight:600;letter-spacing:3.5px;text-transform:uppercase;
+  background:linear-gradient(90deg,var(--cyan),rgba(0,232,217,.6));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
 }
 
 .summit-headline{
-  font-family:'Syne',sans-serif;font-size:17px;font-weight:700;
-  color:#fff;line-height:1.25;letter-spacing:-.2px;
+  font-family:'Syne',sans-serif;font-size:18.5px;font-weight:800;
+  color:#fff;line-height:1.25;letter-spacing:-.3px;
 }
-.summit-headline span{color:var(--gold)}
+.summit-headline span{
+  background:linear-gradient(135deg,var(--gold),var(--gold-hi));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
 
-.divider{width:40px;height:1.5px;background:linear-gradient(90deg,var(--cyan),transparent);opacity:.5}
+.divider{
+  width:48px;height:1.5px;
+  background:linear-gradient(90deg,var(--cyan),var(--gold),transparent);
+  opacity:.55;
+}
 
-.pillars{display:grid;grid-template-columns:1fr 1fr;gap:7px 14px}
+.pillars{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px}
 .pillar{
-  font-size:11.5px;font-weight:400;color:rgba(255,255,255,.45);
-  display:flex;align-items:center;gap:7px;
+  font-size:11px;font-weight:400;color:rgba(255,255,255,.5);
+  display:flex;align-items:center;gap:8px;
 }
 .pillar::before{
   content:'';width:5px;height:5px;border-radius:50%;
-  background:var(--gold);opacity:.7;flex-shrink:0;
+  background:linear-gradient(135deg,var(--gold),var(--gold-hi));
+  opacity:.8;flex-shrink:0;
 }
 
-.datestamp{
-  position:absolute;bottom:24px;right:30px;text-align:right;
-  font-size:10px;font-weight:300;letter-spacing:1.5px;
-  color:rgba(255,255,255,.25);line-height:1.7;
+/* Date badge */
+.datebadge{
+  position:absolute;bottom:22px;right:28px;text-align:right;
+}
+.datebadge-date{
+  font-family:'Syne',sans-serif;font-size:13px;font-weight:800;
+  background:linear-gradient(135deg,var(--gold),var(--gold-hi));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  letter-spacing:.5px;
+}
+.datebadge-loc{
+  font-size:9.5px;font-weight:400;letter-spacing:2px;
+  color:rgba(255,255,255,.28);text-transform:uppercase;margin-top:2px;
 }
 
 /* ===== BUTTONS ===== */
 .controls{
   display:flex;align-items:center;gap:10px;
   position:relative;z-index:10;
-  animation:rise .9s .08s cubic-bezier(.16,1,.3,1) both;
+  animation:rise .9s .1s cubic-bezier(.16,1,.3,1) both;
 }
 
 .btn{
@@ -197,50 +290,93 @@ body{
 }
 
 .btn-icon{
-  width:46px;height:46px;border-radius:13px;
-  background:rgba(255,255,255,.05);
-  border:.5px solid rgba(255,255,255,.12);
+  width:48px;height:48px;border-radius:14px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.12);
   color:rgba(255,255,255,.6);font-size:16px;
+  backdrop-filter:blur(12px);
 }
 .btn-icon:hover{
-  background:rgba(255,255,255,.1);color:#fff;
-  border-color:rgba(255,255,255,.22);transform:translateY(-3px);
+  background:rgba(255,255,255,.12);color:#fff;
+  border-color:rgba(255,255,255,.24);transform:translateY(-4px);
+  box-shadow:0 12px 30px rgba(0,0,0,.4);
 }
-.btn-li:hover{
-  background:rgba(0,119,181,.2);border-color:rgba(0,119,181,.35);color:#5DB8E8;
-}
-.btn-web:hover{background:rgba(0,232,217,.12);border-color:rgba(0,232,217,.3);color:var(--cyan)}
-.btn-mail:hover{background:rgba(200,169,106,.12);border-color:rgba(200,169,106,.3);color:var(--gold)}
+.btn-li:hover{background:rgba(0,119,181,.22);border-color:rgba(0,119,181,.4);color:#5DB8E8}
+.btn-web:hover{background:rgba(0,232,217,.12);border-color:rgba(0,232,217,.35);color:var(--cyan)}
+.btn-mail:hover{background:rgba(200,169,106,.14);border-color:rgba(200,169,106,.35);color:var(--gold)}
 
 .btn-save{
-  height:46px;padding:0 22px;border-radius:13px;gap:9px;
-  background:linear-gradient(135deg,var(--gold) 0%,#E8C87A 100%);
-  color:#150e00;font-size:13px;font-weight:600;letter-spacing:.3px;
-  box-shadow:0 4px 22px rgba(200,169,106,.35);
+  height:48px;padding:0 26px;border-radius:14px;gap:10px;
+  background:linear-gradient(135deg,var(--gold) 0%,#EDD070 50%,var(--gold-deep) 100%);
+  color:#100800;font-size:13px;font-weight:700;letter-spacing:.4px;
+  box-shadow:0 6px 28px rgba(200,169,106,.4),0 0 0 1px rgba(200,169,106,.2);
+  position:relative;overflow:hidden;
 }
+.btn-save::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,transparent 30%,rgba(255,255,255,.2) 50%,transparent 70%);
+  transform:translateX(-100%);transition:transform .5s ease;
+}
+.btn-save:hover::before{transform:translateX(100%)}
 .btn-save:hover{
-  transform:translateY(-3px);
-  box-shadow:0 10px 35px rgba(200,169,106,.55);
-  filter:brightness(1.06);
+  transform:translateY(-4px);
+  box-shadow:0 14px 40px rgba(200,169,106,.6),0 0 0 1px rgba(200,169,106,.3);
+}
+
+/* ─── OVERLAY TEXT (event title banner) ─── */
+.overlay-banner{
+  position:fixed;bottom:0;left:0;right:0;z-index:8;
+  padding:18px 40px 20px;
+  background:linear-gradient(0deg,rgba(4,4,13,.92) 0%,rgba(4,4,13,.6) 70%,transparent 100%);
+  backdrop-filter:blur(6px);
+  display:flex;align-items:flex-end;justify-content:space-between;
+  pointer-events:none;
+  animation:rise .9s .2s cubic-bezier(.16,1,.3,1) both;
+}
+.ov-left{display:flex;flex-direction:column;gap:3px}
+.ov-tag{
+  font-size:9px;letter-spacing:4px;text-transform:uppercase;font-weight:600;
+  color:var(--cyan);opacity:.7;
+}
+.ov-title{
+  font-family:'Syne',sans-serif;font-size:13px;font-weight:800;
+  color:rgba(255,255,255,.22);letter-spacing:.5px;
+}
+.ov-right{
+  font-size:10px;letter-spacing:2px;text-transform:uppercase;
+  color:rgba(255,255,255,.15);font-weight:300;
 }
 
 /* Hint */
 .hint{
-  position:fixed;bottom:22px;left:50%;transform:translateX(-50%);
-  font-size:10px;letter-spacing:2.5px;text-transform:uppercase;
-  color:rgba(255,255,255,.18);font-weight:400;z-index:10;
-  animation:pulse 3.5s ease-in-out infinite,rise .9s .15s cubic-bezier(.16,1,.3,1) both;
+  position:fixed;bottom:62px;left:50%;transform:translateX(-50%);
+  font-size:9.5px;letter-spacing:3px;text-transform:uppercase;
+  color:rgba(255,255,255,.2);font-weight:400;z-index:10;
+  display:flex;align-items:center;gap:8px;
+  animation:pulse 3.5s ease-in-out infinite,rise .9s .18s cubic-bezier(.16,1,.3,1) both;
 }
-@keyframes pulse{0%,100%{opacity:.3}50%{opacity:.7}}
-@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.hint::before,.hint::after{
+  content:'';flex:1;width:30px;height:.5px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.15));
+}
+.hint::after{background:linear-gradient(270deg,transparent,rgba(255,255,255,.15))}
+
+@keyframes pulse{0%,100%{opacity:.3}50%{opacity:.75}}
+@keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+/* fix for fixed hints */
+.hint{transform:translateX(-50%)}
 </style>
 </head>
 <body>
 
+<!-- Background layers -->
+<div class="bg-image"></div>
+<div class="vignette"></div>
+<div class="grade"></div>
 <canvas id="canvas"></canvas>
-<div class="blob blob-a"></div>
-<div class="blob blob-b"></div>
+<div class="noise"></div>
 
+<!-- Card scene -->
 <div class="scene">
   <div class="card" id="card">
 
@@ -249,10 +385,12 @@ body{
       <div class="holo" id="holo"></div>
       <div class="etch tl"></div><div class="etch tr"></div>
       <div class="etch bl"></div><div class="etch br"></div>
-      <div class="chip">
-        <div class="chip-cell"></div><div class="chip-cell"></div><div class="chip-cell"></div>
-        <div class="chip-cell"></div><div class="chip-cell"></div><div class="chip-cell"></div>
-        <div class="chip-cell"></div><div class="chip-cell"></div><div class="chip-cell"></div>
+
+      <!-- Profile photo ring -->
+      <div class="photo-ring">
+        <div class="photo-inner">
+          <div class="photo-initials">SB</div>
+        </div>
       </div>
 
       <div>
@@ -261,9 +399,18 @@ body{
       </div>
 
       <div class="contacts">
-        <div class="c-item"><i class="fa-solid fa-phone"></i> +91 92263 48550</div>
-        <div class="c-item"><i class="fa-solid fa-envelope"></i> sumit@buildtek.in</div>
-        <div class="c-item"><i class="fa-solid fa-globe"></i> buildtek.in</div>
+        <div class="c-item">
+          <div class="c-icon"><i class="fa-solid fa-phone"></i></div>
+          +91 92263 48550
+        </div>
+        <div class="c-item">
+          <div class="c-icon"><i class="fa-solid fa-envelope"></i></div>
+          sumit@buildtek.in
+        </div>
+        <div class="c-item">
+          <div class="c-icon"><i class="fa-solid fa-globe"></i></div>
+          buildtek.in
+        </div>
       </div>
 
       <div class="brand">Build Tek Events</div>
@@ -278,18 +425,22 @@ body{
       <div class="summit-headline">Where <span>Construction</span><br>Meets Technology</div>
       <div class="divider"></div>
       <div class="pillars">
-        <div class="pillar">Developer & Investor Forum</div>
+        <div class="pillar">Developer &amp; Investor Forum</div>
         <div class="pillar">CXO Roundtables</div>
-        <div class="pillar">Capital & Cities</div>
-        <div class="pillar">Builders & Policymakers</div>
+        <div class="pillar">Capital &amp; Cities</div>
+        <div class="pillar">Builders &amp; Policymakers</div>
       </div>
 
-      <div class="datestamp">May 14–15, 2026<br>Pune, India</div>
+      <div class="datebadge">
+        <div class="datebadge-date">July 11 – 12, 2026</div>
+        <div class="datebadge-loc">Pune, India</div>
+      </div>
     </div>
 
   </div>
 </div>
 
+<!-- Action buttons -->
 <div class="controls">
   <a href="https://www.buildtek.in" target="_blank" class="btn btn-icon btn-web" title="Website">
     <i class="fa-solid fa-globe"></i>
@@ -307,83 +458,94 @@ body{
 
 <div class="hint">↕ Tap card to flip</div>
 
+<!-- Bottom overlay banner -->
+<div class="overlay-banner">
+  <div class="ov-left">
+    <div class="ov-tag">Upcoming Event</div>
+    <div class="ov-title">Build Tek Core Summit 2026 &nbsp;·&nbsp; Pune, India</div>
+  </div>
+  <div class="ov-right">July 11 – 12, 2026</div>
+</div>
+
 <script>
 /* ── Particle System ── */
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
-let W,H,pts=[];
+let W, H, pts = [];
 
-function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight}
+function resize(){ W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight }
 
 function Pt(){
   return{
-    x:Math.random()*W,y:Math.random()*H,
-    vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,
-    r:Math.random()*1.2+.4,a:Math.random()*.4+.1
+    x:Math.random()*W, y:Math.random()*H,
+    vx:(Math.random()-.5)*.22, vy:(Math.random()-.5)*.22,
+    r:Math.random()*1.4+.4, a:Math.random()*.35+.1,
+    hue:Math.random() > .6 ? 'gold' : 'cyan'
   }
 }
 
-function init(){pts=[];for(let i=0;i<70;i++)pts.push(Pt())}
+function init(){ pts=[]; for(let i=0;i<80;i++) pts.push(Pt()) }
 
 function draw(){
   ctx.clearRect(0,0,W,H);
   pts.forEach(p=>{
-    p.x+=p.vx;p.y+=p.vy;
-    if(p.x<0)p.x=W;if(p.x>W)p.x=0;
-    if(p.y<0)p.y=H;if(p.y>H)p.y=0;
-    ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-    ctx.fillStyle=`rgba(200,169,106,${p.a})`;ctx.fill();
+    p.x+=p.vx; p.y+=p.vy;
+    if(p.x<0)p.x=W; if(p.x>W)p.x=0;
+    if(p.y<0)p.y=H; if(p.y>H)p.y=0;
+    ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    const col = p.hue==='gold' ? `rgba(200,169,106,${p.a})` : `rgba(0,232,217,${p.a*.6})`;
+    ctx.fillStyle = col; ctx.fill();
   });
   for(let i=0;i<pts.length;i++){
     for(let j=i+1;j<pts.length;j++){
-      const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y;
+      const dx=pts[i].x-pts[j].x, dy=pts[i].y-pts[j].y;
       const d=Math.sqrt(dx*dx+dy*dy);
-      if(d<110){
-        ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);
-        ctx.strokeStyle=`rgba(0,232,217,${.055*(1-d/110)})`;ctx.lineWidth=.5;ctx.stroke();
+      if(d<100){
+        ctx.beginPath(); ctx.moveTo(pts[i].x,pts[i].y); ctx.lineTo(pts[j].x,pts[j].y);
+        ctx.strokeStyle=`rgba(0,232,217,${.05*(1-d/100)})`; ctx.lineWidth=.5; ctx.stroke();
       }
     }
   }
   requestAnimationFrame(draw);
 }
 
-resize();init();draw();
-window.addEventListener('resize',()=>{resize();init()});
+resize(); init(); draw();
+window.addEventListener('resize',()=>{ resize(); init(); });
 
 /* ── 3D Tilt + Holo ── */
-const card=document.getElementById('card');
-const holo=document.getElementById('holo');
-let trx=0,try_=0,crx=0,cry=0,angle=0,flipped=false;
+const card  = document.getElementById('card');
+const holo  = document.getElementById('holo');
+let trx=0, try_=0, crx=0, cry=0, angle=0, flipped=false;
 
-function lerp(a,b,t){return a+(b-a)*t}
+function lerp(a,b,t){ return a+(b-a)*t }
 
-document.addEventListener('mousemove',e=>{
-  if(flipped)return;
-  const r=card.getBoundingClientRect();
-  const cx=r.left+r.width/2,cy=r.top+r.height/2;
-  trx=(e.clientY-cy)/(r.height/2)*-10;
-  try_=(e.clientX-cx)/(r.width/2)*10;
-  holo.style.setProperty('--mx',((e.clientX-r.left)/r.width*100).toFixed(1));
-  holo.style.setProperty('--my',((e.clientY-r.top)/r.height*100).toFixed(1));
+document.addEventListener('mousemove', e=>{
+  if(flipped) return;
+  const r  = card.getBoundingClientRect();
+  const cx = r.left+r.width/2, cy = r.top+r.height/2;
+  trx = (e.clientY-cy)/(r.height/2)*-12;
+  try_= (e.clientX-cx)/(r.width/2)*12;
+  holo.style.setProperty('--mx', ((e.clientX-r.left)/r.width*100).toFixed(1));
+  holo.style.setProperty('--my', ((e.clientY-r.top)/r.height*100).toFixed(1));
 });
 
-document.addEventListener('mouseleave',()=>{trx=0;try_=0});
+document.addEventListener('mouseleave',()=>{ trx=0; try_=0; });
 
 card.addEventListener('click',()=>{
   flipped=!flipped;
   card.classList.add('flipping');
-  card.style.transform=flipped?'rotateY(180deg)':'rotateY(0deg)';
-  trx=0;try_=0;crx=0;cry=0;
+  card.style.transform = flipped ? 'rotateY(180deg)' : 'rotateY(0deg)';
+  trx=0; try_=0; crx=0; cry=0;
   setTimeout(()=>card.classList.remove('flipping'),750);
 });
 
 function tick(){
-  angle=(angle+.6)%360;
-  holo.style.setProperty('--angle',angle);
+  angle = (angle+.5)%360;
+  holo.style.setProperty('--angle', angle);
   if(!flipped){
-    crx=lerp(crx,trx,.07);
-    cry=lerp(cry,try_,.07);
-    card.style.transform=`rotateX(${crx}deg) rotateY(${cry}deg)`;
+    crx = lerp(crx, trx, .07);
+    cry = lerp(cry, try_, .07);
+    card.style.transform = `rotateX(${crx}deg) rotateY(${cry}deg)`;
   }
   requestAnimationFrame(tick);
 }
@@ -401,7 +563,7 @@ function downloadContact(){
   ].join('\n');
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([v],{type:'text/vcard'}));
-  a.download='Sumit_Bhoyar.vcf';a.click();
+  a.download='Sumit_Bhoyar.vcf'; a.click();
 }
 </script>
 </body>
