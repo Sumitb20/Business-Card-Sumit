@@ -1,296 +1,408 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>Sumit Bhoyar | Build Tek Events</title>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<title>Sumit Bhoyar | Build Tek Events</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
 <style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
 :root{
-  --glass: rgba(255, 255, 255, 0.1);
-  --border: rgba(255, 255, 255, 0.2);
-  --primary: #ff2e63; /* Vibrant Pink */
-  --secondary: #08d9d6; /* Vibrant Cyan */
-  --bg-dark: #1a1a2e;
+  --gold:#C8A96A;
+  --gold-hi:#F0D485;
+  --cyan:#00E8D9;
+  --bg:#05050E;
 }
 
-*{box-sizing:border-box}
 body{
-  margin:0;
-  font-family:Inter, sans-serif;
-  overflow:hidden;
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);
   color:#fff;
-  height: 100vh;
-  /* VIBRANT ANIMATED BACKGROUND */
-  background: linear-gradient(-45deg, #ee7752, #862ee4, #23a6d5, #23d5ab);
-  background-size: 400% 400%;
-  animation: gradientBG 15s ease infinite;
-}
-
-@keyframes gradientBG {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-
-/* Dark overlay pattern to retain readability */
-body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-    z-index: -1;
-}
-
-/* --- SCENE LAYOUT --- */
-.scene{
   height:100vh;
+  overflow:hidden;
   display:flex;
-  flex-direction: column;
-  justify-content:center;
+  flex-direction:column;
   align-items:center;
-  perspective:1200px;
-  gap: 30px;
+  justify-content:center;
+  gap:28px;
 }
 
-/* --- 3D CARD --- */
+/* Particle canvas */
+#canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+/* Ambient blobs */
+.blob{position:fixed;border-radius:50%;filter:blur(90px);pointer-events:none}
+.blob-a{width:500px;height:500px;background:radial-gradient(circle,#2A1456 0%,transparent 70%);top:-150px;left:-120px;opacity:.7;animation:driftA 18s ease-in-out infinite}
+.blob-b{width:380px;height:380px;background:radial-gradient(circle,#00372E 0%,transparent 70%);bottom:-80px;right:-80px;opacity:.6;animation:driftB 22s ease-in-out infinite}
+@keyframes driftA{0%,100%{transform:translate(0,0)}50%{transform:translate(40px,30px)}}
+@keyframes driftB{0%,100%{transform:translate(0,0)}50%{transform:translate(-30px,-20px)}}
+
+/* Scene + card */
+.scene{perspective:1400px;position:relative;z-index:10;animation:rise .9s cubic-bezier(.16,1,.3,1) both}
 .card{
-  width:360px;
-  height:220px;
-  position:relative;
-  transform-style:preserve-3d;
-  transition:transform 0.8s cubic-bezier(.2, .8, .2, 1);
-  cursor:pointer;
+  width:390px;height:235px;
+  position:relative;transform-style:preserve-3d;
+  cursor:pointer;will-change:transform;
+  transition:transform .1s linear;
 }
-.card:hover{
-  transform:rotateY(180deg);
-}
+.card.flipping{transition:transform .75s cubic-bezier(.16,1,.3,1)!important}
 
 .face{
-  position:absolute;
-  inset:0;
-  backface-visibility:hidden;
-  border-radius:24px;
-  padding:25px;
-  
-  /* PREMIUM GLASSMORPHISM */
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(25px);
-  -webkit-backdrop-filter: blur(25px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 
-    0 15px 35px rgba(0,0,0,0.2),
-    0 5px 15px rgba(0,0,0,0.1),
-    inset 0 0 20px rgba(255,255,255,0.1);
+  position:absolute;inset:0;border-radius:22px;
+  backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  overflow:hidden;
 }
 
-/* FRONT DESIGN */
-.front{ display:flex; flex-direction:column; justify-content: space-between; }
-.front h2{
-  margin:0; font-size:26px; font-weight:800; letter-spacing: -0.5px;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-.front p{ 
-  margin:2px 0 0; 
-  font-weight: 600; 
-  font-size: 14px; 
-  background: rgba(0,0,0,0.2);
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 20px;
-  color: #fff;
+/* ===== FRONT ===== */
+.front{
+  padding:28px 30px;
+  background:linear-gradient(140deg,rgba(22,18,45,.95) 0%,rgba(10,10,26,.97) 60%,rgba(14,22,38,.97) 100%);
+  border:1px solid rgba(255,255,255,.1);
+  box-shadow:
+    0 0 0 .5px rgba(200,169,106,.2),
+    0 30px 70px rgba(0,0,0,.7),
+    inset 0 1px 0 rgba(255,255,255,.08),
+    inset 0 -1px 0 rgba(0,0,0,.3);
+  display:flex;flex-direction:column;justify-content:space-between;
 }
 
-.contact-details{ font-size:14px; line-height:1.9; margin-top: 15px; font-weight: 500;}
-.contact-details i { margin-right: 12px; width: 20px; text-align: center; color: #fff; filter: drop-shadow(0 0 5px rgba(255,255,255,0.6)); }
+/* Holographic foil */
+.holo{
+  position:absolute;inset:0;border-radius:22px;pointer-events:none;
+  background:conic-gradient(
+    from calc(var(--angle,0)*1deg) at calc(var(--mx,50)*1%) calc(var(--my,50)*1%),
+    hsl(0,100%,70%),hsl(60,100%,70%),hsl(120,100%,70%),
+    hsl(180,100%,70%),hsl(240,100%,70%),hsl(300,100%,70%),hsl(360,100%,70%)
+  );
+  mix-blend-mode:screen;
+  opacity:0;transition:opacity .4s ease;
+}
+.front:hover .holo{opacity:.07}
 
-.logo-brand { 
-  font-weight: 900; 
-  letter-spacing: 2px; 
-  font-size: 12px; 
-  text-align: right; 
-  opacity: 0.9;
-  text-transform: uppercase;
+/* Top shimmer line */
+.front::after{
+  content:'';position:absolute;top:0;left:48px;right:48px;height:1.5px;
+  background:linear-gradient(90deg,transparent,var(--gold),var(--cyan),var(--gold-hi),var(--gold),transparent);
+  opacity:.7;
 }
 
-/* BACK DESIGN */
-.back{ 
-  transform:rotateY(180deg); 
-  display:flex; flex-direction:column; justify-content:center; 
-  background: rgba(0, 0, 0, 0.4); /* Slightly darker back for contrast */
+/* Corner etch marks */
+.etch{position:absolute;width:14px;height:14px;border-color:rgba(200,169,106,.45);border-style:solid}
+.etch.tl{top:13px;left:13px;border-width:1.5px 0 0 1.5px}
+.etch.tr{top:13px;right:13px;border-width:1.5px 1.5px 0 0}
+.etch.bl{bottom:13px;left:13px;border-width:0 0 1.5px 1.5px}
+.etch.br{bottom:13px;right:13px;border-width:0 1.5px 1.5px 0}
+
+/* Chip decor */
+.chip{
+  position:absolute;top:26px;right:28px;width:38px;height:28px;
+  border:1px solid rgba(200,169,106,.3);border-radius:5px;
+  display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;gap:3px;padding:5px;
 }
-.back h3{ 
-  margin:0 0 15px 0; 
-  font-size:16px; 
-  color: var(--secondary);
-  text-transform: uppercase; 
-  letter-spacing: 1px; 
-  border-bottom: 1px solid rgba(255,255,255,0.2); 
-  padding-bottom: 8px;
-}
-.feature-list { display: flex; flex-direction: column; gap: 8px; }
-.feature-list span{ font-size:13px; font-weight: 500; display: flex; align-items: center; }
-.feature-list span::before { 
-    content: "•"; 
-    color: var(--primary); 
-    font-size: 24px; 
-    line-height: 0;
-    margin-right: 10px; 
+.chip-cell{background:rgba(200,169,106,.2);border-radius:1px}
+
+.name{
+  font-family:'Syne',sans-serif;
+  font-size:28px;font-weight:800;letter-spacing:-.5px;
+  background:linear-gradient(135deg,#fff 40%,rgba(255,255,255,.7));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  line-height:1;
 }
 
-/* --- BUTTONS --- */
-.controls-container {
-    display: flex;
-    gap: 15px;
-    z-index: 10;
+.role{
+  margin-top:7px;font-size:10.5px;font-weight:600;
+  letter-spacing:2.5px;text-transform:uppercase;
+  color:var(--gold);display:flex;align-items:center;gap:8px;
+}
+.role::before{content:'';width:22px;height:1px;background:var(--gold);opacity:.6}
+
+.contacts{display:flex;flex-direction:column;gap:9px}
+.c-item{
+  display:flex;align-items:center;gap:11px;
+  font-size:13px;color:rgba(255,255,255,.65);font-weight:400;
+}
+.c-item i{font-size:11px;color:var(--cyan);width:14px;text-align:center;flex-shrink:0}
+
+.brand{
+  position:absolute;bottom:26px;right:30px;
+  font-family:'Syne',sans-serif;font-size:9.5px;font-weight:700;
+  letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.2);
 }
 
-.btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    height: 54px;
-    border-radius: 16px;
-    font-size: 16px;
-    transition: all 0.3s ease;
-    border: none;
-    cursor: pointer;
-    background: #fff;
-    color: #333;
-    font-weight: 700;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+/* ===== BACK ===== */
+.back{
+  padding:28px 30px;
+  transform:rotateY(180deg);
+  background:linear-gradient(140deg,rgba(6,16,28,.97) 0%,rgba(4,10,18,.98) 100%);
+  border:1px solid rgba(0,232,217,.12);
+  box-shadow:
+    0 0 0 .5px rgba(0,232,217,.1),
+    0 30px 70px rgba(0,0,0,.7),
+    inset 0 1px 0 rgba(0,232,217,.08);
+  display:flex;flex-direction:column;justify-content:center;gap:15px;
 }
 
-.btn i { font-size: 20px; }
-
-/* Website & LinkedIn (Icon Squares) */
-.btn-icon { width: 54px; }
-.btn-icon:hover { transform: translateY(-3px) scale(1.05); }
-
-/* Custom Colors */
-.btn-web { color: #333; }
-.btn-li { color: #0077b5; } /* LinkedIn Blue */
-
-/* Save Contact (Main Button) */
-.btn-save {
-    padding: 0 30px;
-    background: #111;
-    color: #fff;
-    gap: 10px;
-}
-.btn-save:hover {
-    transform: translateY(-3px);
-    background: #000;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+/* Blueprint grid */
+.back::before{
+  content:'';position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(0,232,217,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,232,217,.04) 1px,transparent 1px);
+  background-size:28px 28px;pointer-events:none;
 }
 
-.cta-text{
-  position:fixed;
-  bottom:20px;
-  width:100%;
-  text-align:center;
-  font-size:12px;
-  opacity: 0.7;
-  letter-spacing: 1px;
+.summit-eyebrow{
+  font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;
+  color:var(--cyan);opacity:.8;
 }
+
+.summit-headline{
+  font-family:'Syne',sans-serif;font-size:17px;font-weight:700;
+  color:#fff;line-height:1.25;letter-spacing:-.2px;
+}
+.summit-headline span{color:var(--gold)}
+
+.divider{width:40px;height:1.5px;background:linear-gradient(90deg,var(--cyan),transparent);opacity:.5}
+
+.pillars{display:grid;grid-template-columns:1fr 1fr;gap:7px 14px}
+.pillar{
+  font-size:11.5px;font-weight:400;color:rgba(255,255,255,.45);
+  display:flex;align-items:center;gap:7px;
+}
+.pillar::before{
+  content:'';width:5px;height:5px;border-radius:50%;
+  background:var(--gold);opacity:.7;flex-shrink:0;
+}
+
+.datestamp{
+  position:absolute;bottom:24px;right:30px;text-align:right;
+  font-size:10px;font-weight:300;letter-spacing:1.5px;
+  color:rgba(255,255,255,.25);line-height:1.7;
+}
+
+/* ===== BUTTONS ===== */
+.controls{
+  display:flex;align-items:center;gap:10px;
+  position:relative;z-index:10;
+  animation:rise .9s .08s cubic-bezier(.16,1,.3,1) both;
+}
+
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  border:none;cursor:pointer;text-decoration:none;
+  font-family:'DM Sans',sans-serif;font-weight:500;
+  transition:all .25s cubic-bezier(.16,1,.3,1);
+}
+
+.btn-icon{
+  width:46px;height:46px;border-radius:13px;
+  background:rgba(255,255,255,.05);
+  border:.5px solid rgba(255,255,255,.12);
+  color:rgba(255,255,255,.6);font-size:16px;
+}
+.btn-icon:hover{
+  background:rgba(255,255,255,.1);color:#fff;
+  border-color:rgba(255,255,255,.22);transform:translateY(-3px);
+}
+.btn-li:hover{
+  background:rgba(0,119,181,.2);border-color:rgba(0,119,181,.35);color:#5DB8E8;
+}
+.btn-web:hover{background:rgba(0,232,217,.12);border-color:rgba(0,232,217,.3);color:var(--cyan)}
+.btn-mail:hover{background:rgba(200,169,106,.12);border-color:rgba(200,169,106,.3);color:var(--gold)}
+
+.btn-save{
+  height:46px;padding:0 22px;border-radius:13px;gap:9px;
+  background:linear-gradient(135deg,var(--gold) 0%,#E8C87A 100%);
+  color:#150e00;font-size:13px;font-weight:600;letter-spacing:.3px;
+  box-shadow:0 4px 22px rgba(200,169,106,.35);
+}
+.btn-save:hover{
+  transform:translateY(-3px);
+  box-shadow:0 10px 35px rgba(200,169,106,.55);
+  filter:brightness(1.06);
+}
+
+/* Hint */
+.hint{
+  position:fixed;bottom:22px;left:50%;transform:translateX(-50%);
+  font-size:10px;letter-spacing:2.5px;text-transform:uppercase;
+  color:rgba(255,255,255,.18);font-weight:400;z-index:10;
+  animation:pulse 3.5s ease-in-out infinite,rise .9s .15s cubic-bezier(.16,1,.3,1) both;
+}
+@keyframes pulse{0%,100%{opacity:.3}50%{opacity:.7}}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
-
 <body>
 
+<canvas id="canvas"></canvas>
+<div class="blob blob-a"></div>
+<div class="blob blob-b"></div>
+
 <div class="scene">
-  
-  <div class="card" onclick="this.classList.toggle('flipped')">
-    <div class="face front">
+  <div class="card" id="card">
+
+    <!-- FRONT -->
+    <div class="face front" id="front">
+      <div class="holo" id="holo"></div>
+      <div class="etch tl"></div><div class="etch tr"></div>
+      <div class="etch bl"></div><div class="etch br"></div>
+      <div class="chip">
+        <div class="chip-cell"></div><div class="chip-cell"></div><div class="chip-cell"></div>
+        <div class="chip-cell"></div><div class="chip-cell"></div><div class="chip-cell"></div>
+        <div class="chip-cell"></div><div class="chip-cell"></div><div class="chip-cell"></div>
+      </div>
+
       <div>
-        <h2>Sumit Bhoyar</h2>
-        <p>Event Marketing Manager</p>
-        <div class="contact-details">
-          <div><i class="fa-solid fa-phone"></i> +91 92263 48550</div>
-          <div style="margin-top:8px"><i class="fa-solid fa-envelope"></i> sumit@buildtek.in</div>
-        </div>
+        <div class="name">Sumit Bhoyar</div>
+        <div class="role">Event Marketing Manager</div>
       </div>
-      <div class="logo-brand">Build Tek Events</div>
+
+      <div class="contacts">
+        <div class="c-item"><i class="fa-solid fa-phone"></i> +91 92263 48550</div>
+        <div class="c-item"><i class="fa-solid fa-envelope"></i> sumit@buildtek.in</div>
+        <div class="c-item"><i class="fa-solid fa-globe"></i> buildtek.in</div>
+      </div>
+
+      <div class="brand">Build Tek Events</div>
     </div>
 
+    <!-- BACK -->
     <div class="face back">
-      <div class="logo-brand" style="text-align:center; margin-bottom:20px; color:#fff;">Build Tek CORE Summit 2026</div>
-      <h3>Where Construction Meets Tech</h3>
-      <div class="feature-list">
-          <span>Developer Investor Convergence</span>
-          <span>CXO & Decision-Maker Roundtables</span>
-          <span>Builders, Buyers & Policymakers Forum</span>
-          <span>Capital, Construction & Cities</span>
+      <div class="etch tl"></div><div class="etch tr"></div>
+      <div class="etch bl"></div><div class="etch br"></div>
+
+      <div class="summit-eyebrow">Build Tek Core Summit 2026</div>
+      <div class="summit-headline">Where <span>Construction</span><br>Meets Technology</div>
+      <div class="divider"></div>
+      <div class="pillars">
+        <div class="pillar">Developer & Investor Forum</div>
+        <div class="pillar">CXO Roundtables</div>
+        <div class="pillar">Capital & Cities</div>
+        <div class="pillar">Builders & Policymakers</div>
       </div>
+
+      <div class="datestamp">May 14–15, 2026<br>Pune, India</div>
     </div>
-  </div>
-
-  <div class="controls-container">
-    
-    <a href="https://www.buildtek.in" target="_blank" class="btn btn-icon btn-web" title="Visit Website">
-      <i class="fa-solid fa-globe"></i>
-    </a>
-
-    <a href="mailto:sumit@buildtek.in" class="btn btn-icon btn-email" title="Send Email">
-      <i class="fa-solid fa-envelope"></i>
-    </a>
-
-    <a href="https://www.linkedin.com/in/sumit-bhoyar-230b62329/" target="_blank" class="btn btn-icon btn-li" title="LinkedIn Profile">
-      <i class="fa-brands fa-linkedin"></i>
-    </a>
-
-    <button onclick="downloadContact()" class="btn btn-save" title="Save to Outlook/Contacts">
-      <i class="fa-solid fa-user-plus"></i>
-      <span>Save Contact</span>
-    </button>
 
   </div>
-
 </div>
 
-<div class="cta-text">
-  Hover / Tap card to flip
+<div class="controls">
+  <a href="https://www.buildtek.in" target="_blank" class="btn btn-icon btn-web" title="Website">
+    <i class="fa-solid fa-globe"></i>
+  </a>
+  <a href="mailto:sumit@buildtek.in" class="btn btn-icon btn-mail" title="Email">
+    <i class="fa-solid fa-envelope"></i>
+  </a>
+  <a href="https://www.linkedin.com/in/sumit-bhoyar-230b62329/" target="_blank" class="btn btn-icon btn-li" title="LinkedIn">
+    <i class="fa-brands fa-linkedin-in"></i>
+  </a>
+  <button onclick="downloadContact()" class="btn btn-save">
+    <i class="fa-solid fa-user-plus"></i> Save Contact
+  </button>
 </div>
+
+<div class="hint">↕ Tap card to flip</div>
 
 <script>
-function downloadContact() {
-    // 1. Define the vCard Data
-    // Note: The format must be exact for Outlook/Android to read it.
-    const vCardData = [
-        "BEGIN:VCARD",
-        "VERSION:3.0",
-        "N:Bhoyar;Sumit;;;",
-        "FN:Sumit Bhoyar",
-        "ORG:Build Tek Events",
-        "TITLE:Event Marketing Manager",
-        "TEL;TYPE=WORK,VOICE:+919226348550",
-        "EMAIL;TYPE=WORK:sumit@buildtek.in",
-        "URL:https://www.buildtek.in",
-        "URL;type=LinkedIn:https://www.linkedin.com/in/sumit-bhoyar-230b62329/",
-        "END:VCARD"
-    ].join("\n");
+/* ── Particle System ── */
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let W,H,pts=[];
 
-    // 2. Create a blob for the file
-    const blob = new Blob([vCardData], { type: "text/vcard" });
-    const url = URL.createObjectURL(blob);
+function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight}
 
-    // 3. Create a temporary link to trigger download
-    const newLink = document.createElement('a');
-    newLink.download = "Sumit_Bhoyar.vcf";
-    newLink.textContent = "Sumit Bhoyar";
-    newLink.href = url;
-    
-    // 4. Trigger click
-    newLink.click();
-    
-    // 5. Cleanup
-    URL.revokeObjectURL(url);
+function Pt(){
+  return{
+    x:Math.random()*W,y:Math.random()*H,
+    vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,
+    r:Math.random()*1.2+.4,a:Math.random()*.4+.1
+  }
+}
+
+function init(){pts=[];for(let i=0;i<70;i++)pts.push(Pt())}
+
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  pts.forEach(p=>{
+    p.x+=p.vx;p.y+=p.vy;
+    if(p.x<0)p.x=W;if(p.x>W)p.x=0;
+    if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+    ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(200,169,106,${p.a})`;ctx.fill();
+  });
+  for(let i=0;i<pts.length;i++){
+    for(let j=i+1;j<pts.length;j++){
+      const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y;
+      const d=Math.sqrt(dx*dx+dy*dy);
+      if(d<110){
+        ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);
+        ctx.strokeStyle=`rgba(0,232,217,${.055*(1-d/110)})`;ctx.lineWidth=.5;ctx.stroke();
+      }
+    }
+  }
+  requestAnimationFrame(draw);
+}
+
+resize();init();draw();
+window.addEventListener('resize',()=>{resize();init()});
+
+/* ── 3D Tilt + Holo ── */
+const card=document.getElementById('card');
+const holo=document.getElementById('holo');
+let trx=0,try_=0,crx=0,cry=0,angle=0,flipped=false;
+
+function lerp(a,b,t){return a+(b-a)*t}
+
+document.addEventListener('mousemove',e=>{
+  if(flipped)return;
+  const r=card.getBoundingClientRect();
+  const cx=r.left+r.width/2,cy=r.top+r.height/2;
+  trx=(e.clientY-cy)/(r.height/2)*-10;
+  try_=(e.clientX-cx)/(r.width/2)*10;
+  holo.style.setProperty('--mx',((e.clientX-r.left)/r.width*100).toFixed(1));
+  holo.style.setProperty('--my',((e.clientY-r.top)/r.height*100).toFixed(1));
+});
+
+document.addEventListener('mouseleave',()=>{trx=0;try_=0});
+
+card.addEventListener('click',()=>{
+  flipped=!flipped;
+  card.classList.add('flipping');
+  card.style.transform=flipped?'rotateY(180deg)':'rotateY(0deg)';
+  trx=0;try_=0;crx=0;cry=0;
+  setTimeout(()=>card.classList.remove('flipping'),750);
+});
+
+function tick(){
+  angle=(angle+.6)%360;
+  holo.style.setProperty('--angle',angle);
+  if(!flipped){
+    crx=lerp(crx,trx,.07);
+    cry=lerp(cry,try_,.07);
+    card.style.transform=`rotateX(${crx}deg) rotateY(${cry}deg)`;
+  }
+  requestAnimationFrame(tick);
+}
+tick();
+
+/* ── vCard Download ── */
+function downloadContact(){
+  const v=[
+    'BEGIN:VCARD','VERSION:3.0','N:Bhoyar;Sumit;;;','FN:Sumit Bhoyar',
+    'ORG:Build Tek Events','TITLE:Event Marketing Manager',
+    'TEL;TYPE=WORK,VOICE:+919226348550','EMAIL;TYPE=WORK:sumit@buildtek.in',
+    'URL:https://www.buildtek.in',
+    'URL;type=LinkedIn:https://www.linkedin.com/in/sumit-bhoyar-230b62329/',
+    'END:VCARD'
+  ].join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([v],{type:'text/vcard'}));
+  a.download='Sumit_Bhoyar.vcf';a.click();
 }
 </script>
-
 </body>
 </html>
